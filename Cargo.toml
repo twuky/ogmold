@@ -1,0 +1,10 @@
+[package]
+name = "ogmold"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+nanoserde = {version = "0.2.1", default-features = false, features = ["std", "json"]}
+
+[dev-dependencies]
+macroquad = {version = "0.4.16", default-features = false}

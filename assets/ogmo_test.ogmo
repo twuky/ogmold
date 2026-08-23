@@ -1,0 +1,122 @@
+{
+  "name": "New Project",
+  "ogmoVersion": "3.4.0",
+  "levelPaths": ["."],
+  "backgroundColor": "#282c34ff",
+  "gridColor": "#3c4049cc",
+  "anglesRadians": true,
+  "directoryDepth": 5,
+  "layerGridDefaultSize": {"x": 16, "y": 16},
+  "levelDefaultSize": {"x": 320, "y": 240},
+  "levelMinSize": {"x": 128, "y": 128},
+  "levelMaxSize": {"x": 4096, "y": 4096},
+  "levelValues": [
+    {"name": "testset", "definition": "Boolean", "display": 0, "defaults": false},
+    {"name": "new_value", "definition": "Color", "display": 0, "defaults": "#813131ff", "includeAlpha": false}
+  ],
+  "defaultExportMode": ".json",
+  "compactExport": false,
+  "externalScript": "",
+  "playCommand": "",
+  "entityTags": [],
+  "layers": [
+    {
+      "definition": "tile",
+      "name": "tile_layer",
+      "gridSize": {"x": 16, "y": 16},
+      "exportID": "91276205",
+      "exportMode": 0,
+      "arrayMode": 0,
+      "defaultTileset": "New Tileset"
+    },
+    {
+      "definition": "grid",
+      "name": "new_layer",
+      "gridSize": {"x": 16, "y": 16},
+      "exportID": "99242800",
+      "arrayMode": 0,
+      "legend": {"0": "#00000000", "1": "#000000ff"}
+    },
+    {
+      "definition": "decal",
+      "name": "new_layer",
+      "gridSize": {"x": 16, "y": 16},
+      "exportID": "99240551",
+      "folder": "",
+      "includeImageSequence": true,
+      "scaleable": false,
+      "rotatable": false,
+      "values": []
+    },
+    {
+      "definition": "entity",
+      "name": "new_layer",
+      "gridSize": {"x": 16, "y": 16},
+      "exportID": "99244125",
+      "requiredTags": [],
+      "excludedTags": []
+    }
+  ],
+  "entities": [
+    {
+      "exportID": "99078600",
+      "name": "testo",
+      "limit": -1,
+      "size": {"x": 16, "y": 16},
+      "origin": {"x": 0, "y": 0},
+      "originAnchored": true,
+      "shape": {
+        "label": "Rectangle",
+        "points": [
+          {"x": -1, "y": -1},
+          {"x": 1, "y": -1},
+          {"x": -1, "y": 1},
+          {"x": 1, "y": -1},
+          {"x": -1, "y": 1},
+          {"x": 1, "y": 1}
+        ]
+      },
+      "color": "#ff0000ff",
+      "tileX": false,
+      "tileY": false,
+      "tileSize": {"x": 16, "y": 16},
+      "resizeableX": false,
+      "resizeableY": false,
+      "rotatable": false,
+      "rotationDegrees": 360,
+      "canFlipX": false,
+      "canFlipY": false,
+      "canSetColor": false,
+      "hasNodes": false,
+      "nodeLimit": 0,
+      "nodeDisplay": 0,
+      "nodeGhost": true,
+      "tags": [],
+      "values": [
+        {"name": "bool", "definition": "Boolean", "display": 0, "defaults": false},
+        {"name": "color", "definition": "Color", "display": 0, "defaults": "#000000ff", "includeAlpha": false},
+        {
+          "name": "enum",
+          "definition": "Enum",
+          "display": 0,
+          "choices": [""],
+          "defaults": 0
+        },
+        {
+          "name": "path",
+          "definition": "Filepath",
+          "display": 0,
+          "defaults": "proj:",
+          "extensions": []
+        },
+        {"name": "float", "definition": "Float", "display": 0, "defaults": 0, "bounded": false, "min": 0, "max": 100},
+        {"name": "int", "definition": "Integer", "display": 0, "defaults": 0, "bounded": false, "min": 0, "max": 100},
+        {"name": "string", "definition": "String", "display": 0, "defaults": "", "maxLength": 0, "trimWhitespace": true},
+        {"name": "text", "definition": "Text", "display": 0, "defaults": ""}
+      ]
+    }
+  ],
+  "tilesets": [
+    {"label": "New Tileset", "path": "tiles.png", "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAQCAMAAABncAyDAAAABGdBTUEAALGOfPtRkwAAAAZQTFRF+fr7AAAAxBkoRAAAAGBJREFUKJGlkQEKwDAIA8//f3pMrOsGmRkLbbFpAzESH8HIcyJyZSG+Xy+zAFFLS/C8UghhiaVaxyQo57kdS5uTcJrudKqyYn2BEGz03DT3ZA1BsypzydUcvKaJHuG/lA6vNwJi9nb+NAAAAABJRU5ErkJggg==", "tileWidth": 16, "tileHeight": 16, "tileSeparationX": 0, "tileSeparationY": 0, "tileMarginX": 0, "tileMarginY": 0}
+  ]
+}
