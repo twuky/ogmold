@@ -2,7 +2,7 @@ pub mod ogmo;
 pub use ogmo::*;
 
 use nanoserde::{DeJson};
-use std::{io::Read, path::{self, Path, PathBuf}};
+use std::{io::Read, path::{self, PathBuf}};
 
 #[derive(Clone)]
 pub struct Ogmo {

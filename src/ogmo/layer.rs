@@ -237,6 +237,7 @@ pub struct TileLayer {
     pub data_csv: Option<String>,
 }
 
+#[derive(Debug, Clone)]
 pub struct TileDrawData {
     /// position of the tile's bottom left corner in the world
     pub pos_bl: Vec2,
@@ -259,6 +260,71 @@ impl TileDrawData {
 
     pub fn tex_height(&self) -> i32 {
         self.tex_tr.y - self.tex_bl.y
+    }
+}
+
+pub struct TileMeshData {
+    /// position of the tile's bottom left corner in the world
+    pub pos_bl: Vec2,
+    /// position of the tile's top right corner in the world
+    pub pos_tr: Vec2,
+
+    /// position of the tile's bottom left corner in the tileset texture (pixels) for texture UVs
+    /// this is the bottom left corner of the tile's texture for one tile
+    pub tex_bl: Vec2,
+    /// position of the tile's top right corner in the tileset texture (pixels) for texture UVs
+    /// this is the top right corner of the tile's texture for one tile
+    pub tex_tr: Vec2,
+
+    pub tiles_wide: i32,
+    pub tiles_high: i32,
+
+    /// ID of the tile in the Tile Layer
+    pub id: i32,
+}
+
+impl TileMeshData {
+    pub fn tex_width(&self) -> i32 {
+        self.tex_tr.x - self.tex_bl.x
+    }
+
+    pub fn tex_height(&self) -> i32 {
+        self.tex_tr.y - self.tex_bl.y
+    }
+
+    // mesh object's width in pixels (not tiles)
+    pub fn width(&self) -> i32 {
+        self.pos_tr.x - self.pos_bl.x
+    }
+
+    // mesh object's height in pixels (not tiles)
+    pub fn height(&self) -> i32 {
+        self.pos_tr.y - self.pos_bl.y
+    }
+
+    pub fn get_draw_data(&self, tile_width: i32, tile_height: i32) -> impl Iterator<Item = TileDrawData> {
+        let mut out = Vec::new();
+
+        for x in 0..self.tiles_wide {
+            for y in 0..self.tiles_high {
+
+                let pos_bl = Vec2{
+                    x: self.pos_bl.x + x as i32 * tile_width,
+                    y: self.pos_bl.y + y as i32 * tile_height,
+                };
+                let pos_tr = Vec2{
+                    x: pos_bl.x + tile_width,
+                    y: pos_bl.y + tile_height,
+                };
+               
+                let tex_bl = self.tex_bl;
+                let tex_tr = self.tex_tr;
+
+                let tdd = TileDrawData { pos_bl, pos_tr, tex_bl, tex_tr, id: self.id };
+                out.push(tdd);
+            }
+        }
+        out.into_iter()
     }
 }
 
@@ -312,10 +378,10 @@ impl TileLayer {
         })
     }
 
-    pub fn get_tile(&self, x: usize, y: usize) -> Option<i32> {
-        let id = x + y * self.grid_cells_x as usize;
+    pub fn get_tile(&self, x: i32, y: i32) -> Option<i32> {
+        let id = x + y * self.grid_cells_x;
         if let Some(data) = &self.data {
-            if id >= data.len() {
+            if id as usize >= data.len() {
                 return None;
             }
             return Some(data[id as usize]);
@@ -324,6 +390,108 @@ impl TileLayer {
             return data_2d.get(x as usize).and_then(|v| v.get(y as usize).copied());
         }
         None
+    }
+
+    pub fn mesh_flipped(&self, tileset_cells_x: i32) -> Vec<TileMeshData> {
+        self.greedy_mesh(tileset_cells_x, true)
+    }
+
+    pub fn mesh(&self, tileset_cells_x: i32,) -> Vec<TileMeshData> {
+        self.greedy_mesh(tileset_cells_x, false)
+    }
+
+    fn greedy_mesh(&self, tileset_cells_x: i32, flipped: bool) -> Vec<TileMeshData> {
+        let mut out = Vec::new();
+        let Some(grid) = &self.data else { return out };
+        let width = self.grid_cells_x as usize;
+        if width == 0 {
+            return out;
+        }
+
+        let len = grid.len();
+        let mut used = vec![false; len];
+
+        //println!("start");
+
+        for start in 0..len {
+            if used[start] {
+                continue;
+            }
+            let val = &grid[start];
+            let x = start % width;
+
+            let mut my_w = 1;
+            while x + my_w < width && !used[start + my_w] && grid[start + my_w] == *val {
+                my_w += 1;
+            }
+
+            let mut my_h = 1;
+            'down: while start + my_h * width + my_w - 1 < len {
+                let row = start + my_h * width;
+                for j in 0..my_w {
+                    if used[row + j] || grid[row + j] != *val {
+                        break 'down;
+                    }
+                }
+                my_h += 1;
+            }
+
+            //println!("x: {}, y: {}, my_w: {}, my_h: {}, val: {:?}", x, y, my_w, my_h, val);
+
+            for dy in 0..my_h {
+                for dx in 0..my_w {
+                    used[start + dy * width + dx] = true;
+                }
+            }
+
+            let x; let y;
+            let pos_x; let pos_y;
+            let pos_bl; let pos_tr;
+            let tex_bl; let tex_tr;
+
+            let tiles_wide = my_w as i32;
+            let tiles_high = my_h as i32;
+
+            let my_w = my_w as i32 * self.grid_cell_width;
+            let my_h = my_h as i32 * self.grid_cell_height;
+
+            if flipped {
+                x = start as i32 % self.grid_cells_x;
+                y = start as i32 / self.grid_cells_x;
+
+                pos_x = x * self.grid_cell_width + self.offset_x;
+                pos_y = -(y * self.grid_cell_height + self.offset_y) + self.grid_cells_y * self.grid_cell_height;
+
+                pos_bl = Vec2{ x: pos_x, y: pos_y };
+                pos_tr = Vec2{ x: pos_bl.x + my_w, y: pos_bl.y - my_h};
+
+                tex_bl = Vec2{ x: *val % tileset_cells_x * self.grid_cell_width, y: *val / tileset_cells_x * self.grid_cell_height };
+                tex_tr = Vec2{ x: tex_bl.x + self.grid_cell_height, y: tex_bl.y + self.grid_cell_height };
+            } else {
+                x = start as i32 % self.grid_cells_x;
+                y = start as i32 / self.grid_cells_x;
+
+                pos_x = x * self.grid_cell_width + self.offset_x;
+                pos_y = y * self.grid_cell_height + self.offset_y;
+
+                pos_bl = Vec2{ x: pos_x, y: pos_y };
+                pos_tr = Vec2{ x: pos_bl.x + my_w, y: pos_bl.y + my_h };
+
+                tex_bl = Vec2{ x: *val % tileset_cells_x * self.grid_cell_width, y: *val / tileset_cells_x * self.grid_cell_height };
+                tex_tr = Vec2{ x: tex_bl.x + self.grid_cell_height, y: tex_bl.y + self.grid_cell_height };
+            }
+
+            out.push(TileMeshData {
+                pos_bl,
+                pos_tr,
+                tex_bl,
+                tex_tr,
+                tiles_wide,
+                tiles_high,
+                id: *val,
+            });
+        }
+        out
     }
 }
 
@@ -342,6 +510,138 @@ pub struct GridLayer {
     pub grid_2d: Option<Vec<Vec<String>>>,
     /// Enum to determine whether a Grid Layer exports it's Data as a 1D Array or a 2D Array
     pub array_mode: i32,
+}
+
+#[derive(Debug, Clone)]
+pub struct GridMeshData {
+    pub value: String,
+
+    pub bottom: i32,
+    pub top: i32,
+    pub left: i32,
+    pub right: i32,
+
+    pub tiles_x: i32,
+    pub tiles_y: i32,
+}
+
+impl GridMeshData {
+    pub fn bl(&self) -> Vec2 {
+        Vec2{ x: self.left, y: self.bottom }
+    }
+    pub fn br(&self) -> Vec2 {
+        Vec2{ x: self.right, y: self.bottom }
+    }
+    pub fn tl(&self) -> Vec2 {
+        Vec2{ x: self.left, y: self.top }
+    }
+    pub fn tr(&self) -> Vec2 {
+        Vec2{ x: self.right, y: self.top }
+    }
+
+    pub fn tex_width(&self) -> i32 {
+        (self.right - self.left).abs()
+    }
+
+    pub fn tex_height(&self) -> i32 {
+        (self.top - self.bottom).abs()
+    }
+}
+
+
+impl GridLayer {
+    pub fn get_tile(&self, x: i32, y: i32) -> Option<String> {
+        let id = x + y * self.grid_cells_x;
+        if let Some(data) = &self.grid {
+            if id as usize >= data.len() {
+                return None;
+            }
+            return Some(data[id as usize].clone());
+        }
+        if let Some(data_2d) = &self.grid_2d {
+            return data_2d.get(x as usize).and_then(|v| v.get(y as usize).cloned());
+        }
+        None
+    }
+
+    pub fn mesh_flipped(&self) -> Vec<GridMeshData> {
+        self.mesh_greedy(true)
+    }
+
+    pub fn mesh(&self) -> Vec<GridMeshData> {
+        self.mesh_greedy(false)
+    }
+
+    fn mesh_greedy(&self, flipped: bool) -> Vec<GridMeshData> {
+        let mut out = Vec::new();
+        let Some(grid) = &self.grid else { return out };
+        let width = self.grid_cells_x as usize;
+        if width == 0 {
+            return out;
+        }
+
+        let len = grid.len();
+        let mut used = vec![false; len];
+
+        //println!("start");
+
+        for start in 0..len {
+            if used[start] {
+                continue;
+            }
+            let val = &grid[start];
+            let x = start % width;
+            let y = start / width;
+
+            let mut my_w = 1;
+            while x + my_w < width && !used[start + my_w] && grid[start + my_w] == *val {
+                my_w += 1;
+            }
+
+            let mut my_h = 1;
+            'down: while start + my_h * width + my_w - 1 < len {
+                let row = start + my_h * width;
+                for j in 0..my_w {
+                    if used[row + j] || grid[row + j] != *val {
+                        break 'down;
+                    }
+                }
+                my_h += 1;
+            }
+
+            for dy in 0..my_h {
+                for dx in 0..my_w {
+                    used[start + dy * width + dx] = true;
+                }
+            }
+
+            if flipped {
+                out.push(GridMeshData {
+                    value: val.clone(),
+                    bottom: y as i32 * self.grid_cell_height,
+                    top: (y + my_h) as i32 * self.grid_cell_height,
+                    left: x as i32 * self.grid_cell_width,
+                    right: (x + my_w) as i32 * self.grid_cell_width,
+                    tiles_x: my_w as i32,
+                    tiles_y: my_h as i32,
+                });
+            } else {
+                let top = y as i32 * self.grid_cell_height + self.offset_y;
+                let bottom = top + my_h as i32 * self.grid_cell_height;
+
+                out.push(GridMeshData {
+                    value: val.clone(),
+                    bottom,
+                    top,
+                    left: x as i32 * self.grid_cell_width,
+                    right: (x + my_w) as i32 * self.grid_cell_width,
+                    tiles_x: my_w as i32,
+                    tiles_y: my_h as i32,
+                });
+            }            
+        }
+        out
+    }
 }
 
 #[derive(Debug, Clone)]

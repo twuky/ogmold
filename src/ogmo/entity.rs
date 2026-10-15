@@ -12,12 +12,18 @@ pub struct Entity {
     pub id: i32,
     #[nserde(rename = "_eid")]
     pub eid: String,
+    /// X position of the entity in pixels
     pub x: i32,
+    /// Y position of the entity in pixels
     pub y: i32,
     pub width: Option<i32>,
     pub height: Option<i32>,
+    /// X offset of the entity's origin in pixels
+    /// 0,0 is the top left corner of the entity
     #[nserde(rename = "originX")]
     pub origin_x: Option<i32>,
+    /// Y offset of the entity's origin in pixels
+    /// 0,0 is the top left corner of the entity
     #[nserde(rename = "originY")]
     pub origin_y: Option<i32>,
     #[nserde(default)]

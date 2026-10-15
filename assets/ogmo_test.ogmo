@@ -35,7 +35,7 @@
       "gridSize": {"x": 16, "y": 16},
       "exportID": "99242800",
       "arrayMode": 0,
-      "legend": {"0": "#00000000", "1": "#000000ff"}
+      "legend": {"0": "#00000000", "1": "#4a98737d", "2": "#81343446"}
     },
     {
       "definition": "decal",
@@ -63,7 +63,7 @@
       "name": "testo",
       "limit": -1,
       "size": {"x": 16, "y": 16},
-      "origin": {"x": 0, "y": 0},
+      "origin": {"x": 8, "y": 8},
       "originAnchored": true,
       "shape": {
         "label": "Rectangle",
