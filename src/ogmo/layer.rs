@@ -411,8 +411,6 @@ impl TileLayer {
         let len = grid.len();
         let mut used = vec![false; len];
 
-        //println!("start");
-
         for start in 0..len {
             if used[start] {
                 continue;
@@ -435,8 +433,6 @@ impl TileLayer {
                 }
                 my_h += 1;
             }
-
-            //println!("x: {}, y: {}, my_w: {}, my_h: {}, val: {:?}", x, y, my_w, my_h, val);
 
             for dy in 0..my_h {
                 for dx in 0..my_w {
@@ -582,8 +578,6 @@ impl GridLayer {
 
         let len = grid.len();
         let mut used = vec![false; len];
-
-        //println!("start");
 
         for start in 0..len {
             if used[start] {

@@ -34,7 +34,6 @@ async fn main() {
               let mut color = WHITE;
               // values on entities are stored as KV pairs
               let c = entity.values.get("color").unwrap();
-              println!("color: {:?}", c);
               // each value may only be one of the following types
               // String, Bool, Float, Int
               // this is independent of the type of the value in the .ogmo file, which includes
