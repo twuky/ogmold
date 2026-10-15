@@ -309,8 +309,8 @@ impl TileMeshData {
             for y in 0..self.tiles_high {
 
                 let pos_bl = Vec2{
-                    x: self.pos_bl.x + x as i32 * tile_width,
-                    y: self.pos_bl.y + y as i32 * tile_height,
+                    x: self.pos_bl.x + x * tile_width,
+                    y: self.pos_bl.y + y * tile_height,
                 };
                 let pos_tr = Vec2{
                     x: pos_bl.x + tile_width,
